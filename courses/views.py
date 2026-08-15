@@ -37,3 +37,16 @@ class CourseDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     permission_classes = [IsAdminOrStaffOrReadOnly]
+
+
+# ── Centre Contacts ──────────────────────────────────────────────────────────
+from .models import CentreContact
+from .serializers import CentreContactSerializer
+
+class CentreContactListView(generics.ListAPIView):
+    """
+    GET /api/courses/contacts/ — Retrieve contact numbers for all locations.
+    """
+    queryset = CentreContact.objects.all()
+    serializer_class = CentreContactSerializer
+    permission_classes = [permissions.AllowAny]
