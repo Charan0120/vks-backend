@@ -71,6 +71,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'vks_backend.wsgi.application'
 
 # Database configuration
+import os
+print("==================================================")
+print("DEBUG MODE:", DEBUG)
+print("DATABASE_URL EXISTS IN ENV:", "DATABASE_URL" in os.environ)
+if "DATABASE_URL" in os.environ:
+    print("DATABASE_URL START:", os.environ["DATABASE_URL"][:15])
+else:
+    print("ALL ENV KEYS:", list(os.environ.keys()))
+print("==================================================")
+
 DATABASES = {
     'default': dj_database_url.config(
         default=f"postgresql://{config('DB_USER', default='postgres')}:{config('DB_PASSWORD', default='postgres')}@{config('DB_HOST', default='localhost')}:{config('DB_PORT', default='5432')}/{config('DB_NAME', default='vks_db')}",
