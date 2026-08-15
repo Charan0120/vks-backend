@@ -90,11 +90,11 @@ from .serializers import AdminUserSerializer
 
 class IsAdminUser(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == 'ADMIN'
+        return request.user.is_authenticated and (request.user.role == 'ADMIN' or request.user.is_superuser)
 
 class IsStaffOrAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role in ['ADMIN', 'STAFF']
+        return request.user.is_authenticated and (request.user.role in ['ADMIN', 'STAFF'] or request.user.is_superuser or request.user.is_staff)
 
 class UserListView(generics.ListAPIView):
     """
