@@ -98,11 +98,11 @@ class IsStaffOrAdmin(permissions.BasePermission):
 
 class UserListView(generics.ListAPIView):
     """
-    GET /api/auth/users/ — List all users (admin/staff only).
+    GET /api/auth/users/ — List all users (admin only).
     """
     queryset = User.objects.all()
     serializer_class = AdminUserSerializer
-    permission_classes = [IsStaffOrAdmin]
+    permission_classes = [IsAdminUser]
     filter_backends = [filters.SearchFilter]
     search_fields = ['email', 'username', 'first_name', 'last_name', 'phone']
 
