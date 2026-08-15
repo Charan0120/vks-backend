@@ -177,8 +177,6 @@ JAZZMIN_SETTINGS = {
         "courses.course": "fas fa-book",
         "notifications.notification": "fas fa-bell",
     },
-        "notifications.notification": "fas fa-bell",
-    },
 
     "default_icon_parents": "fas fa-folder",
     "default_icon_children": "fas fa-circle",
