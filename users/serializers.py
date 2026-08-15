@@ -44,8 +44,8 @@ class LoginSerializer(serializers.Serializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'phone', 'role', 'date_joined']
-        read_only_fields = ['id', 'email', 'role', 'date_joined']
+        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'phone', 'role', 'centre', 'date_joined']
+        read_only_fields = ['id', 'email', 'role', 'centre', 'date_joined']
 
 
 class TokenResponseSerializer(serializers.Serializer):
@@ -58,5 +58,5 @@ class TokenResponseSerializer(serializers.Serializer):
 class AdminUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'phone', 'role', 'is_active', 'date_joined']
+        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'phone', 'role', 'centre', 'is_active', 'date_joined']
         read_only_fields = ['id', 'email', 'date_joined']

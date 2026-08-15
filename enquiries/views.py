@@ -33,6 +33,17 @@ class EnquiryListView(generics.ListAPIView):
 
     def get_queryset(self):
         qs = Enquiry.objects.all()
+        user = self.request.user
+        
+        # Staff is filtered to their assigned centre
+        if user.role == 'STAFF' and user.centre != 'ALL':
+            qs = qs.filter(preferred_centre=user.centre)
+        # Admin can view all and filter by preferred_centre parameter
+        elif user.role == 'ADMIN' or user.centre == 'ALL':
+            centre_filter = self.request.query_params.get('preferred_centre')
+            if centre_filter:
+                qs = qs.filter(preferred_centre=centre_filter.upper())
+
         status = self.request.query_params.get('status')
         referred_by = self.request.query_params.get('referred_by')
         fees_type = self.request.query_params.get('fees_type')
@@ -48,8 +59,14 @@ class EnquiryListView(generics.ListAPIView):
 class EnquiryDetailView(generics.RetrieveUpdateAPIView):
     """
     GET  /api/enquiries/<id>/ — View enquiry detail
-    PATCH /api/enquiries/<id>/ — Update status, remarks, payment (admin/staff)
+    PATCH /api/enquiries/<id>/ — Update status, remarks (admin/staff)
     """
     queryset = Enquiry.objects.all()
     serializer_class = EnquiryAdminSerializer
     permission_classes = [IsAdminOrStaff]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'STAFF' and user.centre != 'ALL':
+            return Enquiry.objects.filter(preferred_centre=user.centre)
+        return Enquiry.objects.all()

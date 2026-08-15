@@ -12,8 +12,8 @@ class DocumentInline(admin.TabularInline):
 
 @admin.register(Admission)
 class AdmissionAdmin(admin.ModelAdmin):
-    list_display = ('student_name', 'selected_course', 'mobile_number', 'status', 'created_at')
-    list_filter = ('status', 'selected_course', 'gender')
+    list_display = ('student_name', 'selected_course', 'preferred_centre', 'mobile_number', 'status', 'created_at')
+    list_filter = ('status', 'selected_course', 'preferred_centre', 'gender')
     search_fields = ('student_name', 'mobile_number', 'email')
     ordering = ('-created_at',)
     readonly_fields = ('user', 'created_at', 'updated_at')
@@ -27,7 +27,7 @@ class AdmissionAdmin(admin.ModelAdmin):
             'fields': ('mobile_number', 'email', 'address')
         }),
         ('Academic & Course', {
-            'fields': ('qualification', 'selected_course')
+            'fields': ('qualification', 'selected_course', 'preferred_centre')
         }),
         ('Application Status', {
             'fields': ('status', 'admin_remarks')

@@ -14,12 +14,23 @@ class User(AbstractUser):
         STUDENT = 'STUDENT', 'Student'
         PUBLIC = 'PUBLIC', 'Public'
 
+    class Centre(models.TextChoices):
+        MUMBAI = 'MUMBAI', 'Mumbai'
+        HYDERABAD = 'HYDERABAD', 'Hyderabad'
+        ONLINE = 'ONLINE', 'Online'
+        ALL = 'ALL', 'All Centres'
+
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
     role = models.CharField(
         max_length=10,
         choices=Role.choices,
         default=Role.PUBLIC,
+    )
+    centre = models.CharField(
+        max_length=15,
+        choices=Centre.choices,
+        default=Centre.ALL,
     )
 
     USERNAME_FIELD = 'email'

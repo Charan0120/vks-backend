@@ -55,7 +55,6 @@ class Enquiry(models.Model):
 
     # Status & Admin fields
     status        = models.CharField(max_length=15, choices=Status.choices, default=Status.NEW)
-    payment_made  = models.BooleanField(default=False)
     staff_remarks = models.TextField(blank=True)
 
     # Dates

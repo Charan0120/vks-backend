@@ -25,6 +25,12 @@ class Admission(models.Model):
         related_name='admissions',
     )
 
+    class Centre(models.TextChoices):
+        MUMBAI = 'MUMBAI', 'Mumbai'
+        HYDERABAD = 'HYDERABAD', 'Hyderabad'
+        ONLINE = 'ONLINE', 'Online'
+        NOT_DECIDED = 'NOT_DECIDED', 'Not Decided'
+
     # Student Personal Details
     student_name = models.CharField(max_length=150)
     father_name = models.CharField(max_length=150)
@@ -35,6 +41,13 @@ class Admission(models.Model):
     email = models.EmailField()
     address = models.TextField()
     qualification = models.CharField(max_length=200)
+
+    # Preferred Centre to Enroll
+    preferred_centre = models.CharField(
+        max_length=20,
+        choices=Centre.choices,
+        default=Centre.NOT_DECIDED,
+    )
 
     # Course
     selected_course = models.ForeignKey(

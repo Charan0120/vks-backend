@@ -23,7 +23,7 @@ class AdmissionSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'student_name', 'father_name', 'mother_name',
             'gender', 'date_of_birth', 'mobile_number', 'email', 'address',
-            'qualification', 'selected_course', 'selected_course_detail',
+            'qualification', 'preferred_centre', 'selected_course', 'selected_course_detail',
             'status', 'admin_remarks', 'documents', 'created_at', 'updated_at'
         ]
         read_only_fields = ['status', 'admin_remarks', 'created_at', 'updated_at']

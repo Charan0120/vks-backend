@@ -47,6 +47,17 @@ class AdmissionListView(generics.ListAPIView):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        user = self.request.user
+        
+        # Staff is filtered to their assigned centre
+        if user.role == 'STAFF' and user.centre != 'ALL':
+            qs = qs.filter(preferred_centre=user.centre)
+        # Admin can view all and filter by preferred_centre parameter
+        elif user.role == 'ADMIN' or user.centre == 'ALL':
+            centre_filter = self.request.query_params.get('preferred_centre')
+            if centre_filter:
+                qs = qs.filter(preferred_centre=centre_filter.upper())
+                
         status_filter = self.request.query_params.get('status')
         if status_filter:
             qs = qs.filter(status=status_filter.upper())
@@ -68,7 +79,9 @@ class AdmissionDetailView(generics.RetrieveUpdateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role in ['ADMIN', 'STAFF']:
+        if user.role == 'STAFF' and user.centre != 'ALL':
+            return Admission.objects.filter(preferred_centre=user.centre)
+        elif user.role == 'ADMIN' or user.centre == 'ALL':
             return Admission.objects.all()
         return Admission.objects.filter(user=user)
 
