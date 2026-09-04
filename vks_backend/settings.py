@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'enquiries',
     'gallery',
     'notifications',
+    'students',
 ]
 
 MIDDLEWARE = [
@@ -229,3 +230,6 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-success",
     },
 }
+
+# Fast2SMS API Key for SMS notifications
+FAST2SMS_API_KEY = config('FAST2SMS_API_KEY', default='')
