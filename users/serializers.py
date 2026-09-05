@@ -5,24 +5,32 @@ from .models import User
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
-    password2 = serializers.CharField(write_only=True, min_length=8)
+    username = serializers.CharField(required=False, allow_blank=True)
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
+    phone = serializers.CharField(required=False, allow_blank=True)
+    password = serializers.CharField(write_only=True, min_length=6)
+    password2 = serializers.CharField(write_only=True, min_length=6)
 
     class Meta:
         model = User
         fields = ['id', 'email', 'username', 'first_name', 'last_name', 'phone', 'centre', 'password', 'password2']
 
     def validate(self, data):
-        if data['password'] != data['password2']:
+        if data.get('password') != data.get('password2'):
             raise serializers.ValidationError({'password': 'Passwords do not match.'})
         return data
 
     def create(self, validated_data):
-        validated_data.pop('password2')
+        validated_data.pop('password2', None)
         password = validated_data.pop('password')
+        email = validated_data.get('email', '')
+        username = validated_data.get('username')
+        if not username:
+            validated_data['username'] = email.split('@')[0] if email else 'user'
         user = User(**validated_data)
         user.set_password(password)
-        user.role = User.Role.PUBLIC  # All public registrations default to PUBLIC role
+        user.role = User.Role.PUBLIC
         user.save()
         return user
 
@@ -63,6 +71,10 @@ class AdminUserSerializer(serializers.ModelSerializer):
 
 
 class AdminCreateUserSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=False, allow_blank=True)
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
+    phone = serializers.CharField(required=False, allow_blank=True)
     password = serializers.CharField(write_only=True, min_length=6)
 
     class Meta:
@@ -72,7 +84,10 @@ class AdminCreateUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop('password')
         role = validated_data.get('role', User.Role.STAFF)
-        username = validated_data.get('username') or validated_data.get('email', '').split('@')[0]
+        email = validated_data.get('email', '')
+        username = validated_data.get('username')
+        if not username:
+            username = email.split('@')[0] if email else 'user'
         validated_data['username'] = username
         user = User(**validated_data)
         user.set_password(password)
@@ -80,4 +95,5 @@ class AdminCreateUserSerializer(serializers.ModelSerializer):
             user.is_staff = True
         user.save()
         return user
+
 
