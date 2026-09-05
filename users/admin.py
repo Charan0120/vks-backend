@@ -1,44 +1,54 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django import forms
 from .models import User
 
 
-class CustomUserCreationForm(UserCreationForm):
+class UserAdminForm(forms.ModelForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput(),
+        required=False,
+        help_text="Leave blank to keep existing password, or enter a new password."
+    )
+
     class Meta:
         model = User
-        fields = ('email', 'username', 'first_name', 'last_name', 'phone', 'role', 'centre')
+        fields = ['email', 'username', 'first_name', 'last_name', 'phone', 'role', 'centre', 'is_active', 'is_staff', 'is_superuser']
 
-
-class CustomUserChangeForm(UserChangeForm):
-    class Meta:
-        model = User
-        fields = '__all__'
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data.get('password')
+        if password:
+            user.set_password(password)
+        if commit:
+            user.save()
+        return user
 
 
 @admin.register(User)
-class UserAdmin(BaseUserAdmin):
-    add_form = CustomUserCreationForm
-    form = CustomUserChangeForm
-    model = User
-
+class UserAdmin(admin.ModelAdmin):
+    form = UserAdminForm
     list_display = ('email', 'first_name', 'last_name', 'role', 'centre', 'is_staff', 'is_active', 'date_joined')
     list_filter = ('role', 'centre', 'is_staff', 'is_active')
     search_fields = ('email', 'first_name', 'last_name', 'phone')
     ordering = ('-date_joined',)
+    readonly_fields = ('date_joined', 'last_login')
 
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
-        ('Personal Information', {'fields': ('username', 'first_name', 'last_name', 'phone')}),
-        ('Role & Centre', {'fields': ('role', 'centre')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Important Dates', {'fields': ('last_login', 'date_joined')}),
-    )
-
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'username', 'first_name', 'last_name', 'phone', 'role', 'centre', 'password1', 'password2'),
+        ('Account Credentials', {
+            'fields': ('email', 'username', 'password')
+        }),
+        ('Personal Information', {
+            'fields': ('first_name', 'last_name', 'phone')
+        }),
+        ('Role & Centre Assignment', {
+            'fields': ('role', 'centre')
+        }),
+        ('Permissions & Status', {
+            'fields': ('is_active', 'is_staff', 'is_superuser')
+        }),
+        ('Important Dates', {
+            'fields': ('date_joined', 'last_login')
         }),
     )
+
 
