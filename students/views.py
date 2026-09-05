@@ -250,3 +250,85 @@ class DashboardStatsView(APIView):
                 for s in birthdays_today
             ],
         })
+
+
+# ─── Excel / CSV Report Export ───────────────────────────────────────────────
+
+class StudentExportCSVView(APIView):
+    permission_classes = [IsStaffOrAdmin]
+
+    def get(self, request):
+        import csv
+        from django.http import HttpResponse
+
+        user = request.user
+        qs   = Student.objects.select_related('course', 'added_by').prefetch_related('fee_payments')
+
+        if user.role == 'STAFF' and hasattr(user, 'centre') and user.centre != 'ALL':
+            qs = qs.filter(centre=user.centre)
+
+        status_f = request.query_params.get('status')
+        centre_f = request.query_params.get('centre')
+        search   = request.query_params.get('search')
+
+        if status_f and status_f != 'ALL':
+            qs = qs.filter(status=status_f)
+        if centre_f and centre_f != 'ALL':
+            qs = qs.filter(centre=centre_f)
+        if search:
+            qs = qs.filter(name__icontains=search) | qs.filter(phone__icontains=search)
+
+        filename_suffix = status_f.lower() if status_f and status_f != 'ALL' else 'all'
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = f'attachment; filename="vks_students_report_{filename_suffix}.csv"'
+
+        # Write UTF-8 BOM for Microsoft Excel compatibility
+        response.write('\ufeff')
+
+        writer = csv.writer(response)
+        writer.writerow([
+            'Student ID',
+            'Full Name',
+            'Phone Number',
+            'Email Address',
+            'Status',
+            'Centre',
+            'Course',
+            'Total Agreed Fee (INR)',
+            'Amount Paid (INR)',
+            'Remaining Due (INR)',
+            'Date of Birth',
+            'Gender',
+            'Education',
+            'Residential Address',
+            'Enquiry Date',
+            'Joined Date',
+            'Staff Remarks / Notes',
+            'Registered By',
+            'Created Date',
+        ])
+
+        for s in qs:
+            writer.writerow([
+                s.id,
+                s.name,
+                s.phone,
+                s.email or '',
+                s.status,
+                s.centre,
+                s.course.title if s.course else 'N/A',
+                float(s.total_fee),
+                float(s.fee_paid),
+                float(s.fee_remaining),
+                s.date_of_birth.strftime('%Y-%m-%d') if s.date_of_birth else '',
+                s.gender or '',
+                s.education or '',
+                s.address or '',
+                s.enquiry_date.strftime('%Y-%m-%d') if s.enquiry_date else '',
+                s.joined_date.strftime('%Y-%m-%d') if s.joined_date else '',
+                s.remarks or '',
+                (s.added_by.get_full_name() or s.added_by.username) if s.added_by else '',
+                s.created_at.strftime('%Y-%m-%d %H:%M'),
+            ])
+
+        return response
