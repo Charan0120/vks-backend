@@ -60,3 +60,24 @@ class AdminUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'username', 'first_name', 'last_name', 'phone', 'role', 'centre', 'is_active', 'date_joined']
         read_only_fields = ['id', 'email', 'date_joined']
+
+
+class AdminCreateUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=6)
+
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'phone', 'role', 'centre', 'password']
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        role = validated_data.get('role', User.Role.STAFF)
+        username = validated_data.get('username') or validated_data.get('email', '').split('@')[0]
+        validated_data['username'] = username
+        user = User(**validated_data)
+        user.set_password(password)
+        if role in [User.Role.STAFF, User.Role.ADMIN]:
+            user.is_staff = True
+        user.save()
+        return user
+

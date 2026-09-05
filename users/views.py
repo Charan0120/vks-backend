@@ -86,7 +86,7 @@ class ProfileView(APIView):
 
 from rest_framework import generics, filters
 from .models import User
-from .serializers import AdminUserSerializer
+from .serializers import AdminUserSerializer, AdminCreateUserSerializer
 
 class IsAdminUser(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -113,6 +113,13 @@ class UserListView(generics.ListAPIView):
             qs = qs.filter(role=role.upper())
         return qs
 
+class UserCreateView(generics.CreateAPIView):
+    """
+    POST /api/auth/users/create/ — Admin creates a new staff/admin user.
+    """
+    serializer_class = AdminCreateUserSerializer
+    permission_classes = [IsAdminUser]
+
 class UserRoleUpdateView(generics.UpdateAPIView):
     """
     PATCH /api/auth/users/<id>/role/ — Update user role (admin only).
@@ -124,6 +131,7 @@ class UserRoleUpdateView(generics.UpdateAPIView):
 
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
+
 
 
 # ── OTP Verification ──────────────────────────────────────────────────────────

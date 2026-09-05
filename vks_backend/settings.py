@@ -117,12 +117,18 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS
+# CORS & CSRF
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
     default='http://localhost:3000,http://localhost:8081'
 ).split(',')
 CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.onrender.com',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+] + [origin for origin in config('CSRF_TRUSTED_ORIGINS', default='').split(',') if origin]
 
 # Django REST Framework
 REST_FRAMEWORK = {
@@ -171,22 +177,18 @@ JAZZMIN_SETTINGS = {
 
     "order_with_respect_to": [
         "users",
-        "admissions",
-        "enquiries",
-        "gallery",
+        "students",
         "courses",
-        "notifications",
     ],
 
     "icons": {
         "auth": "fas fa-users-cog",
         "users.user": "fas fa-user",
-        "admissions.admission": "fas fa-file-alt",
-        "admissions.document": "fas fa-paperclip",
-        "enquiries.enquiry": "fas fa-envelope",
-        "gallery.galleryitem": "fas fa-images",
+        "students.student": "fas fa-user-graduate",
+        "students.feepayment": "fas fa-money-bill-wave",
+        "students.reminder": "fas fa-bell",
+        "students.broadcast": "fas fa-bullhorn",
         "courses.course": "fas fa-book",
-        "notifications.notification": "fas fa-bell",
     },
 
     "default_icon_parents": "fas fa-folder",

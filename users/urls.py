@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     RegisterView, LoginView, LogoutView, ProfileView,
-    UserListView, UserRoleUpdateView,
+    UserListView, UserCreateView, UserRoleUpdateView,
     SendOtpView, VerifyOtpView,
 )
 
@@ -19,6 +19,8 @@ urlpatterns = [
 
     # Admin User Management
     path('users/', UserListView.as_view(), name='admin-users-list'),
+    path('users/create/', UserCreateView.as_view(), name='admin-user-create'),
     path('users/<int:pk>/role/', UserRoleUpdateView.as_view(), name='admin-user-role-update'),
 ]
+
 
