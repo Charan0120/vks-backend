@@ -16,7 +16,6 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
-    'jazzmin',          # Must be before django.contrib.admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,6 +38,7 @@ INSTALLED_APPS = [
     'notifications',
     'students',
 ]
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -154,85 +154,39 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
 }
 
-# -------------------------------------------------------------------
-# Jazzmin Admin Theme Settings  (Minimal & Easy to Understand)
-# -------------------------------------------------------------------
-JAZZMIN_SETTINGS = {
-    "site_title": "VKS Academy Admin",
-    "site_header": "VKS Academy Admin",
-    "site_brand": "VKS Academy",
-    "site_logo": None,
-    "login_logo": None,
-    "welcome_sign": "Welcome to VKS Creative Skill Academy Admin Panel",
-    "copyright": "VKS Creative Skill Academy",
-
-    "topmenu_links": [
-        {"name": "Visit Website", "url": "https://www.vkscreativeskill.in", "new_window": True},
-        {"model": "users.user"},
-    ],
-
-    "show_sidebar": True,
-    "navigation_expanded": True,
-    "hide_apps": [],
-    "hide_models": [],
-
-    "order_with_respect_to": [
-        "users",
-        "students",
-        "courses",
-    ],
-
-    "icons": {
-        "auth": "fas fa-users-cog",
-        "users.user": "fas fa-user",
-        "students.student": "fas fa-user-graduate",
-        "students.feepayment": "fas fa-money-bill-wave",
-        "students.reminder": "fas fa-bell",
-        "students.broadcast": "fas fa-bullhorn",
-        "courses.course": "fas fa-book",
-    },
-
-    "default_icon_parents": "fas fa-folder",
-    "default_icon_children": "fas fa-circle",
-
-    "related_modal_active": True,
-    "custom_css": None,
-    "custom_js": None,
-    "show_ui_builder": False,
-    "changeform_format": "horizontal_tabs",
-}
-
-JAZZMIN_UI_TWEAKS = {
-    "navbar_small_text": False,
-    "footer_small_text": False,
-    "body_small_text": False,
-    "brand_small_text": False,
-    "brand_colour": "navbar-primary",
-    "accent": "accent-primary",
-    "navbar": "navbar-white navbar-light",
-    "no_navbar_border": False,
-    "navbar_fixed": False,
-    "layout_boxed": False,
-    "footer_fixed": False,
-    "sidebar_fixed": True,
-    "sidebar": "sidebar-dark-primary",
-    "sidebar_nav_small_text": False,
-    "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": True,
-    "sidebar_nav_compact_style": False,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
-    "theme": "default",
-    "dark_mode_theme": None,
-    "button_classes": {
-        "primary": "btn-primary",
-        "secondary": "btn-secondary",
-        "info": "btn-info",
-        "warning": "btn-warning",
-        "danger": "btn-danger",
-        "success": "btn-success",
-    },
-}
-
 # Fast2SMS API Key for SMS notifications
 FAST2SMS_API_KEY = config('FAST2SMS_API_KEY', default='')
+
+# Console Logging for Production Debugging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[%(asctime)s] %(levelname)s %(name)s: %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}
+
