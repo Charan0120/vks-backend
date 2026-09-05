@@ -132,6 +132,20 @@ class UserRoleUpdateView(generics.UpdateAPIView):
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
 
+class UserDeleteView(generics.DestroyAPIView):
+    """
+    DELETE /api/auth/users/<id>/ — Admin deletes a user account.
+    """
+    queryset = User.objects.all()
+    permission_classes = [IsAdminUser]
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.id == request.user.id:
+            return Response({'error': 'You cannot delete your own admin account.'}, status=status.HTTP_400_BAD_REQUEST)
+        return super().delete(request, *args, **kwargs)
+
+
 
 
 # ── OTP Verification ──────────────────────────────────────────────────────────
