@@ -22,6 +22,7 @@ urlpatterns = [
     path('broadcast/', views.BroadcastSendView.as_view(), name='broadcast-send'),
     path('broadcast/history/', views.BroadcastListView.as_view(), name='broadcast-history'),
 
-    # Export Report (CSV / Excel)
-    path('export-csv/', views.StudentExportCSVView.as_view(), name='student-export-csv'),
+    # Export Report (Excel / CSV)
+    path('export-excel/', views.StudentExportExcelView.as_view(), name='student-export-excel'),
+    path('export-csv/', views.StudentExportExcelView.as_view(), name='student-export-csv'),
 ]

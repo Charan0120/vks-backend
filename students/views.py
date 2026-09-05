@@ -252,13 +252,16 @@ class DashboardStatsView(APIView):
         })
 
 
-# ─── Excel / CSV Report Export ───────────────────────────────────────────────
+# ─── Native Excel (.xlsx) Report Export ─────────────────────────────────────
 
-class StudentExportCSVView(APIView):
+class StudentExportExcelView(APIView):
     permission_classes = [IsStaffOrAdmin]
 
     def get(self, request):
-        import csv
+        import io
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.utils import get_column_letter
         from django.http import HttpResponse
 
         user = request.user
@@ -278,38 +281,37 @@ class StudentExportCSVView(APIView):
         if search:
             qs = qs.filter(name__icontains=search) | qs.filter(phone__icontains=search)
 
-        filename_suffix = status_f.lower() if status_f and status_f != 'ALL' else 'all'
-        response = HttpResponse(content_type='text/csv; charset=utf-8')
-        response['Content-Disposition'] = f'attachment; filename="vks_students_report_{filename_suffix}.csv"'
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Students Report"
+        ws.views.sheetView[0].showGridLines = True
 
-        # Write UTF-8 BOM for Microsoft Excel compatibility
-        response.write('\ufeff')
+        headers = [
+            'Student ID', 'Full Name', 'Phone Number', 'Email Address',
+            'Status', 'Centre', 'Course', 'Total Agreed Fee (INR)',
+            'Amount Paid (INR)', 'Remaining Due (INR)', 'Date of Birth',
+            'Gender', 'Education', 'Residential Address', 'Enquiry Date',
+            'Joined Date', 'Staff Remarks / Notes', 'Registered By', 'Created Date'
+        ]
+        ws.append(headers)
 
-        writer = csv.writer(response)
-        writer.writerow([
-            'Student ID',
-            'Full Name',
-            'Phone Number',
-            'Email Address',
-            'Status',
-            'Centre',
-            'Course',
-            'Total Agreed Fee (INR)',
-            'Amount Paid (INR)',
-            'Remaining Due (INR)',
-            'Date of Birth',
-            'Gender',
-            'Education',
-            'Residential Address',
-            'Enquiry Date',
-            'Joined Date',
-            'Staff Remarks / Notes',
-            'Registered By',
-            'Created Date',
-        ])
+        header_fill = PatternFill(start_color="1E3D59", end_color="1E3D59", fill_type="solid")
+        header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+        thin_border = Border(
+            left=Side(style='thin', color='DDDDDD'),
+            right=Side(style='thin', color='DDDDDD'),
+            top=Side(style='thin', color='DDDDDD'),
+            bottom=Side(style='thin', color='DDDDDD'),
+        )
+
+        for col_num in range(1, len(headers) + 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal="center", vertical="center")
 
         for s in qs:
-            writer.writerow([
+            ws.append([
                 s.id,
                 s.name,
                 s.phone,
@@ -331,4 +333,26 @@ class StudentExportCSVView(APIView):
                 s.created_at.strftime('%Y-%m-%d %H:%M'),
             ])
 
+        for col in ws.columns:
+            max_len = 0
+            col_letter = get_column_letter(col[0].column)
+            for cell in col:
+                cell.border = thin_border
+                val_str = str(cell.value or '')
+                if len(val_str) > max_len:
+                    max_len = len(val_str)
+            ws.column_dimensions[col_letter].width = max(max_len + 4, 13)
+
+        output = io.BytesIO()
+        wb.save(output)
+        output.seek(0)
+
+        filename_suffix = status_f.lower() if status_f and status_f != 'ALL' else 'all'
+        filename = f"VKS_Students_Report_{filename_suffix}.xlsx"
+
+        response = HttpResponse(
+            output.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
