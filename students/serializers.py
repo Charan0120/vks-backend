@@ -12,7 +12,7 @@ class FeePaymentSerializer(serializers.ModelSerializer):
             'id', 'student', 'amount', 'payment_date', 'payment_mode',
             'receipt_note', 'recorded_by', 'recorded_by_name', 'created_at',
         ]
-        read_only_fields = ['recorded_by', 'created_at']
+        read_only_fields = ['student', 'recorded_by', 'created_at']
 
     def get_recorded_by_name(self, obj):
         if obj.recorded_by:
@@ -31,7 +31,7 @@ class ReminderSerializer(serializers.ModelSerializer):
             'reminder_type', 'message', 'remind_at',
             'repeat_interval', 'is_sent', 'created_by', 'created_at',
         ]
-        read_only_fields = ['created_by', 'is_sent', 'created_at']
+        read_only_fields = ['student', 'created_by', 'is_sent', 'created_at']
 
 
 class StudentListSerializer(serializers.ModelSerializer):
