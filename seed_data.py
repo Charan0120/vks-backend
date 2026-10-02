@@ -15,12 +15,16 @@ from courses.models import Course
 print("🌱 Seeding VKS Creative Skill Academy database...")
 
 # ─── Admin User ──────────────────────────────────────────────────────────────
+admin_email = os.environ.get('DJANGO_SUPERUSER_EMAIL', os.environ.get('ADMIN_EMAIL', 'admin@vks-sharanyango.org.in')).strip()
+admin_password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', os.environ.get('ADMIN_PASSWORD', 'VKSAdmin@2024!')).strip()
+admin_username = os.environ.get('DJANGO_SUPERUSER_USERNAME', os.environ.get('ADMIN_USERNAME', admin_email.split('@')[0])).strip()
+
 admin, created = User.objects.get_or_create(
-    email='admin@vks-sharanyango.org.in',
+    email=admin_email,
     defaults={
-        'username': 'admin',
-        'first_name': 'Veena',
-        'last_name': 'Prakash',
+        'username': admin_username,
+        'first_name': 'Admin',
+        'last_name': 'User',
         'phone': '09769228347',
         'role': User.Role.ADMIN,
         'centre': User.Centre.ALL,
@@ -28,12 +32,12 @@ admin, created = User.objects.get_or_create(
         'is_superuser': True,
     }
 )
-if created:
-    admin.set_password('VKSAdmin@2024!')
-    admin.save()
-    print("  ✓ Admin user created: admin@vks-sharanyango.org.in")
-else:
-    print("  ✓ Admin user already exists.")
+admin.set_password(admin_password)
+admin.is_staff = True
+admin.is_superuser = True
+admin.role = User.Role.ADMIN
+admin.save()
+print(f"  ✓ Admin user ready: {admin_email}")
 
 # ─── Courses ─────────────────────────────────────────────────────────────────
 courses_data = [
