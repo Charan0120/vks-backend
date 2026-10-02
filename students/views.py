@@ -21,7 +21,17 @@ def send_sms(phone, message):
     """Send SMS via Fast2SMS API."""
     api_key = getattr(settings, 'FAST2SMS_API_KEY', '')
     if not api_key:
+        print("⚠️ [SMS] FAST2SMS_API_KEY is not configured in Render Environment Variables.")
         return False
+
+    # Extract digits only (take last 10 digits for Indian phone numbers)
+    clean_digits = ''.join(filter(str.isdigit, str(phone)))
+    if len(clean_digits) > 10:
+        clean_digits = clean_digits[-10:]
+    if len(clean_digits) != 10:
+        print(f"⚠️ [SMS] Invalid 10-digit phone number: '{phone}' -> '{clean_digits}'")
+        return False
+
     try:
         resp = requests.post(
             'https://www.fast2sms.com/dev/bulkV2',
@@ -31,13 +41,15 @@ def send_sms(phone, message):
                 'message': message,
                 'language': 'english',
                 'flash': 0,
-                'numbers': phone,
+                'numbers': clean_digits,
             },
             timeout=10,
         )
         data = resp.json()
+        print(f"📡 [SMS] Fast2SMS result for {clean_digits}: {data}")
         return data.get('return', False)
-    except Exception:
+    except Exception as e:
+        print(f"❌ [SMS] Fast2SMS exception for {clean_digits}: {e}")
         return False
 
 
